@@ -35,5 +35,9 @@ class TestTaskManager(unittest.TestCase):
         self.assertFalse(self.mgr.delete_task(999))
         self.assertEqual(len(self.mgr.list_tasks()), 0)
 
+    def test_add_empty_title_raises_error(self):
+        with self.assertRaises(ValueError):
+            self.mgr.add_task("   ")
+
 if __name__ == "__main__":
     unittest.main()
