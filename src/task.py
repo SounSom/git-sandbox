@@ -6,6 +6,7 @@ class Task:
     id: int
     title: str
     completed: bool = False
+    due_date: Optional[str] = None
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -15,5 +16,6 @@ class Task:
         return cls(
             id=data["id"],
             title=data["title"],
-            completed=data.get("completed", False)
+            completed=data.get("completed", False),
+            due_date=data.get("due_date", None)
         )
