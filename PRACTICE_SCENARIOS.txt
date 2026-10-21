@@ -1,0 +1,138 @@
+GIT HANDS-ON PRACTICE SCENARIOS (SANDBOX REPO)
+==============================================
+
+Repository Structure:
+- src/task.py          Task data model
+- src/manager.py       TaskManager core logic (JSON storage)
+- src/cli.py           CLI parser & commands (add, list, done, rm)
+- tests/test_manager.py Unit tests (run via: python3 -m unittest discover -s tests)
+- .gitignore           Ignores caches, logs, .env, tasks.json
+- .env.example         Template configuration file
+
+Current Branches:
+- main                         Base stable release
+- feature/priority-support     Adds priority levels to tasks (2 commits)
+- feature/due-dates            Adds due dates (intentionally overlaps priority lines)
+- bugfix/whitespace-validation Disallows blank task titles (2 commits, good for rebase)
+
+
+SCENARIO 1: MERGING A CLEAN FEATURE BRANCH
+------------------------------------------
+Goal: Merge 'feature/priority-support' into 'main'.
+
+1. Ensure you are on main:
+     git checkout main
+2. Inspect the diff between main and the feature branch:
+     git diff main..feature/priority-support
+3. Merge the feature branch:
+     git merge feature/priority-support -m "merge: integrate task priority support"
+4. Run tests to confirm nothing broke:
+     python3 -m unittest discover -s tests
+5. Inspect your git graph:
+     git log --graph --oneline -n 6
+
+
+SCENARIO 2: INDUCING & RESOLVING A MERGE CONFLICT
+-------------------------------------------------
+Goal: Try to merge 'feature/due-dates' into 'main' right after Scenario 1.
+Because both branches modified the same fields in Task and TaskManager, Git will halt
+and ask you to resolve the conflict.
+
+1. Attempt the merge:
+     git merge feature/due-dates
+   (Git outputs: CONFLICT (content): Merge conflict in src/task.py, etc.)
+2. Check conflict status:
+     git status
+3. Inspect conflict markers:
+     git diff
+   You will see:
+     <<<<<<< HEAD
+     ... priority code from main ...
+     =======
+     ... due date code from feature/due-dates ...
+     >>>>>>> feature/due-dates
+4. Resolve the files:
+   Edit src/task.py, src/manager.py, and src/cli.py so that Task supports BOTH
+   priority and due_date!
+5. Stage the resolved files:
+     git add src/task.py src/manager.py src/cli.py
+6. Complete the merge commit:
+     git commit -m "merge: integrate due date support with priority handling"
+7. Verify tests pass:
+     python3 -m unittest discover -s tests
+
+
+SCENARIO 3: INTERACTIVE REBASE & SQUASHING COMMITS
+--------------------------------------------------
+Goal: Clean up a messy commit history before merging.
+
+1. Switch to the bugfix branch:
+     git checkout bugfix/whitespace-validation
+2. Inspect the last 2 commits:
+     git log -n 2 --oneline
+3. Start interactive rebase for the last 2 commits:
+     git rebase -i HEAD~2
+4. In the editor that opens:
+   Leave the first commit as 'pick', change the second commit from 'pick' to 'squash' (or 's').
+   Save and exit the editor.
+5. In the commit message editor that opens:
+   Combine the message into:
+     fix(manager): disallow whitespace task titles and update docs
+   Save and close.
+6. Verify your single clean commit:
+     git log -n 1 --stat
+
+
+SCENARIO 4: CHERRY-PICKING A HOTFIX
+-----------------------------------
+Goal: Apply only a specific commit from one branch to another without merging the whole branch.
+
+1. Switch to main:
+     git checkout main
+2. Find the commit hash you want from bugfix/whitespace-validation:
+     git log bugfix/whitespace-validation -n 2 --oneline
+3. Cherry-pick the target commit hash:
+     git cherry-pick <commit-hash>
+4. Check git log:
+     git log -n 1
+
+
+SCENARIO 5: STASHING UNCOMMITTED CHANGES
+----------------------------------------
+Goal: Temporarily shelve half-finished work so you can switch branches cleanly.
+
+1. Make an unfinished edit in src/manager.py (e.g. add a print or comment).
+2. Check git status (shows modified file).
+3. Stash it:
+     git stash push -m "WIP: experimental logging"
+4. Check git status (working tree is clean).
+5. View your stash list:
+     git stash list
+6. Bring back your changes:
+     git stash pop
+
+
+SCENARIO 6: UNDOING MISTAKES SAFELY
+-----------------------------------
+- Discard unstaged changes in a file:
+    git restore src/manager.py
+- Unstage a file you accidentally ran 'git add' on:
+    git restore --staged src/manager.py
+- Revert a published commit by making an inverse commit (safe for teams):
+    git revert <commit-hash>
+- Soft reset (undo last commit but keep changes staged):
+    git reset --soft HEAD~1
+
+
+SCENARIO 7: CONNECTING & PUSHING TO GITHUB
+------------------------------------------
+Because GitHub CLI (gh) is authenticated on your system:
+
+To create a new private remote repository and push everything in one command:
+  gh repo create git-sandbox --private --source=. --remote=origin --push
+
+Or if you already created an empty repository on GitHub web:
+  git remote add origin https://github.com/SounSom/<repo-name>.git
+  git branch -M main
+  git push -u origin main
+  git push --all origin
