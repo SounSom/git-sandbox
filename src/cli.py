@@ -8,6 +8,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     add_parser = subparsers.add_parser("add", help="Add a new task")
     add_parser.add_argument("title", type=str, help="Task title")
+    add_parser.add_argument("--priority", choices=["low", "medium", "high"], default="medium", help="Task priority level")
 
     list_parser = subparsers.add_parser("list", help="List tasks")
     list_parser.add_argument("--all", action="store_true", help="Include completed tasks")
@@ -26,8 +27,8 @@ def main() -> None:
     mgr = TaskManager()
 
     if args.command == "add":
-        task = mgr.add_task(args.title)
-        print(f"Added task #{task.id}: {task.title}")
+        task = mgr.add_task(args.title, priority=args.priority)
+        print(f"Added task #{task.id}: {task.title} (priority: {task.priority})")
     elif args.command == "list":
         tasks = mgr.list_tasks(include_completed=args.all)
         if not tasks:
@@ -35,7 +36,7 @@ def main() -> None:
             return
         for t in tasks:
             status = "[x]" if t.completed else "[ ]"
-            print(f"{status} #{t.id}: {t.title}")
+            print(f"{status} #{t.id} [{t.priority.upper()}]: {t.title}")
     elif args.command == "done":
         task = mgr.complete_task(args.id)
         if task:

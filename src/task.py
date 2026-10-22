@@ -6,6 +6,7 @@ class Task:
     id: int
     title: str
     completed: bool = False
+    priority: str = "medium"
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -15,5 +16,6 @@ class Task:
         return cls(
             id=data["id"],
             title=data["title"],
-            completed=data.get("completed", False)
+            completed=data.get("completed", False),
+            priority=data.get("priority", "medium")
         )

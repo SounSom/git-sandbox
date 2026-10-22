@@ -22,10 +22,10 @@ class TaskManager:
         with open(self.storage_path, "w", encoding="utf-8") as f:
             json.dump([t.to_dict() for t in self.tasks], f, indent=2)
 
-    def add_task(self, title: str) -> Task:
+    def add_task(self, title: str, priority: str = "medium") -> Task:
         clean_title = title.strip()
         next_id = max([t.id for t in self.tasks], default=0) + 1
-        task = Task(id=next_id, title=clean_title)
+        task = Task(id=next_id, title=clean_title, priority=priority)
         self.tasks.append(task)
         self._save()
         return task
